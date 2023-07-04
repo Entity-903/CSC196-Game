@@ -13,6 +13,9 @@
     <ClCompile Include="Memory.cpp">
       <Filter>Source</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\..\..\Downloads\Time.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="FileIO.h">
@@ -22,6 +25,9 @@
       <Filter>Source</Filter>
     </ClInclude>
     <ClInclude Include="Random.h">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\..\Downloads\Time.h">
       <Filter>Source</Filter>
     </ClInclude>
   </ItemGroup>
