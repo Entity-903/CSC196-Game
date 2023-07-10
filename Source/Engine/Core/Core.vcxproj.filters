@@ -30,5 +30,11 @@
     <ClInclude Include="..\..\..\..\..\..\Downloads\Time.h">
       <Filter>Source</Filter>
     </ClInclude>
+    <ClInclude Include="Vector2.h">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="Core.h">
+      <Filter>Source</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
