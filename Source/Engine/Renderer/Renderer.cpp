@@ -3,6 +3,8 @@
 
 namespace kiko
 {
+	Renderer g_renderer;
+
 	bool Renderer::Initialize()
 	{
 		SDL_Init(SDL_INIT_VIDEO);
@@ -38,7 +40,7 @@ namespace kiko
 	}
 	void Renderer::DrawLine(float x1, float y1, float x2, float y2)
 	{
-		SDL_RenderDrawLine(m_renderer, x1, y1, x2, y2);
+		SDL_RenderDrawLineF(m_renderer, x1, y1, x2, y2);
 	}
 	void Renderer::DrawPoint(int x, int y)
 	{
@@ -46,6 +48,6 @@ namespace kiko
 	}
 	void Renderer::DrawPoint(float x, float y)
 	{
-		SDL_RenderDrawPoint(m_renderer, x, y);
+		SDL_RenderDrawPointF(m_renderer, x, y);
 	}
 }

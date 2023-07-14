@@ -2,7 +2,12 @@
 #include "Renderer/Renderer.h"
 #include "Core/Core.h"
 #include "Renderer/Model.h"
+#include "Input/InputSystem.h"
+#include "Player.h"
+#include "Enemy.h"
+
 #include <vector>
+#include <thread>
 
 using namespace std;
 
@@ -11,12 +16,11 @@ class Star
 public:
 	Star(const kiko::Vector2& pos, const kiko::Vector2& vel) :
 		m_pos{ pos },
-		m_vel{ vel }
-	{}
+		m_vel{ vel } {}
 
 	void Update(int width, int height)
 	{
-		m_pos += m_vel;
+		m_pos += m_vel * kiko::g_time.GetDeltaTime();
 		if (m_pos.x >= width) m_pos.x = 0;
 		if (m_pos.y >= height) m_pos.y = 0;
 	}
@@ -35,47 +39,93 @@ public:
 int main(int argc, char* argv[])
 {
 	kiko::seedRandom((unsigned int)time(nullptr));
+	kiko::setFilePath("assets");
 
-	kiko::Renderer renderer;
-	renderer.Initialize();
-	renderer.CreateWindow("CSC196", 800, 600);
+	// engine initialization
+	//kiko::Renderer renderer;
+	kiko::g_renderer.Initialize();
+	kiko::g_renderer.CreateWindow("CSC196", 800, 600);
 
-	std::vector<kiko::vec2> points{ { -50, 0 }, { 50, 25 }, { 0, -25 }, { -50, 0 } };
-	kiko::Model model(points);
+	kiko::g_inputSystem.Initialize();
 
-	kiko::vec2 v{5, 5};
-	v.Normalize();
+	//std::vector<kiko::vec2> points{ { 1, 0, 0}, 6, { 0.00, -3.00 },	{ 2.00, 3.00 },	{ -3.00, -1.00 }, { 3.00, -1.00 }, { -2.00, 3.00 }, { 0.00, -3.00 }};
+	kiko::Model model;
+	model.Load("Star.txt");
+	kiko::vec2 position{ 400, 300 };
+
+	float speed = 100;
+	constexpr float turnrate = kiko::DegreesToRadians(180);
+
+	Player player{ 200, kiko::Pi, { { 400, 300 }, 0, 6 }, model };
+
+	std::vector<Enemy> enemies;
+	for (int i = 0; i < 1000; i++)
+	{
+		Enemy enemy{ 300, kiko::Pi, { { kiko::randomf(kiko::g_renderer.GetWidth()), kiko::randomf(kiko::g_renderer.GetHeight()) }, kiko::randomf(kiko::TwoPi), 3}, model}; // Enemy enemy{ 300, kiko::Pi, { { 400, 300 }, kiko::randomf(kiko::TwoPi), 3}, model};
+		enemies.push_back(enemy);
+	}
 
 	vector<Star> stars;
 	for (int i = 0; i < 5000; i++)
 	{
-		kiko::Vector2 pos(kiko::random(renderer.GetWidth()), kiko::random(renderer.GetHeight()));
-		kiko::Vector2 vel(kiko::randomf(1, 4), 0.0f);
+		kiko::Vector2 pos(kiko::random(kiko::g_renderer.GetWidth()), kiko::random(kiko::g_renderer.GetHeight()));
+		kiko::Vector2 vel(kiko::randomf(100, 200), 0.0f);
 
 		stars.push_back(Star(pos, vel));
 	}
 
-while (true)
-{
-	renderer.SetColor(0, 0, 0, 0);
-	renderer.BeginFrame();
-	// Draw
-	kiko::Vector2 vel(1.0f, 0.3f);
+	kiko::Transform transform{ { 400, 300 }, 0, 3};
 
-	//for (auto& star : stars)
-	//{
-	//	star.Update(renderer.GetWidth(), renderer.GetHeight());
+	// Main Game Loop
+	bool quit = false;
+	while (!quit)
+	{
+		// Update engine
+		kiko::g_time.Tick();
+		kiko::g_inputSystem.Update();
+		if (kiko::g_inputSystem.GetKeyDown(SDL_SCANCODE_ESCAPE))
+		{
+			quit = true;
+		}
 
-	//	if (star.m_pos.x >= renderer.GetWidth()) star.m_pos.x = 0;
-	//	if (star.m_pos.y >= renderer.GetHeight()) star.m_pos.y = 0;
+		//cout << "Current Mouse Position: " << kiko::g_inputSystem.GetMousePosition().x << " " << kiko::g_inputSystem.GetMousePosition().y << endl;
+		//if (inputSystem.GetMouseButtonDown(0)) { cout << "Left Mouse Pressed" << endl; }
+		//if (inputSystem.GetMouseButtonDown(1)) { cout << "Middle Mouse Pressed" << endl; }
+		//if (inputSystem.GetMouseButtonDown(2)) { cout << "Right Mouse Pressed" << endl; }
 
-	renderer.SetColor(kiko::random(256), kiko::random(256), kiko::random(256), 255);
-	//	renderer.DrawPoint(star.m_pos.x, star.m_pos.y);
-	//}
+		//position += direction * speed * kiko::g_time.GetDeltaTime();;
+
+		// Update game
+		player.Update(kiko::g_time.GetDeltaTime());
+		for (auto& enemy : enemies) enemy.Update(kiko::g_time.GetDeltaTime());
+
+		// Draw game
+		kiko::g_renderer.SetColor(0, 0, 0, 0);
+		kiko::g_renderer.BeginFrame();
+
+		for (auto& star : stars)
+		{
+			star.Update(kiko::g_renderer.GetWidth(), kiko::g_renderer.GetHeight());
+
+			if (star.m_pos.x >= kiko::g_renderer.GetWidth()) star.m_pos.x = 0;
+			if (star.m_pos.y >= kiko::g_renderer.GetHeight()) star.m_pos.y = 0;
+
+			kiko::g_renderer.SetColor(255, 255, 255, 255);
+			kiko::g_renderer.DrawPoint(star.m_pos.x, star.m_pos.y);
+		}
 	
-	model.Draw(renderer, {400, 300}, 2.0f);
+		kiko::g_renderer.SetColor(kiko::random(256), kiko::random(256), kiko::random(256), 255);
 
+		player.Draw(kiko::g_renderer);
+		for (auto& enemy : enemies) {
+			kiko::g_renderer.SetColor(kiko::random(256), kiko::random(256), kiko::random(256), 255);
+			enemy.Draw(kiko::g_renderer);
+		}
+		
 
-	renderer.EndFrame();
-}
+		kiko::g_renderer.EndFrame();
+
+	}
+
+	return 0;
 }
