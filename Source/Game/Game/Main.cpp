@@ -1,4 +1,3 @@
-#include <iostream>
 #include "Renderer/Renderer.h"
 #include "Core/Core.h"
 #include "Renderer/Model.h"
@@ -8,8 +7,10 @@
 #include "Audio/AudioSystem.h"
 #include "Framework/Scene.h"
 
+#include <iostream>
 #include <vector>
 #include <thread>
+#include <memory>
 
 using namespace std;
 
@@ -40,6 +41,13 @@ public:
 
 int main(int argc, char* argv[])
 {
+
+	{
+	//std::unique_ptr<int> up = std::make_unique<int>(10);
+	}
+
+	kiko::g_memoryTracker.DisplayInfo();
+
 	kiko::seedRandom((unsigned int)time(nullptr));
 	kiko::setFilePath("assets");
 
@@ -51,7 +59,6 @@ int main(int argc, char* argv[])
 	kiko::g_audioSystem.Initialize();
 	kiko::g_audioSystem.AddAudio("Laser_Shoot", "Laser_Shoot.wav");
 
-	//std::vector<kiko::vec2> points{ { 1, 0, 0}, 6, { 0.00, -3.00 },	{ 2.00, 3.00 },	{ -3.00, -1.00 }, { 3.00, -1.00 }, { -2.00, 3.00 }, { 0.00, -3.00 }};
 	kiko::Model model;
 	model.Load("Star.txt");
 	kiko::vec2 position{ 400, 300 };
@@ -60,10 +67,14 @@ int main(int argc, char* argv[])
 	constexpr float turnrate = kiko::DegreesToRadians(180);
 
 	kiko::Scene scene;
+	unique_ptr<Player> player = std::make_unique<Player>(200.0f, kiko::Pi, kiko::Transform{ { 400, 300 }, 0, 6 }, model);
+	scene.Add(std::move(player));
+
+
 	for (int i = 0; i < 10; i++)
 	{
-		Enemy* enemy = new Enemy{ 300, kiko::Pi, { { kiko::randomf(kiko::g_renderer.GetWidth()), kiko::randomf(kiko::g_renderer.GetHeight()) }, kiko::randomf(kiko::TwoPi), 3}, model}; // Enemy enemy{ 300, kiko::Pi, { { 400, 300 }, kiko::randomf(kiko::TwoPi), 3}, model};
-		scene.Add(enemy);
+		unique_ptr<Enemy> enemy = std::make_unique<Enemy>(300.0f, kiko::Pi, kiko::Transform{ {kiko::randomf(kiko::g_renderer.GetWidth()), kiko::randomf(kiko::g_renderer.GetHeight())}, kiko::randomf(kiko::TwoPi), 3}, model);
+		scene.Add(std::move(enemy));
 	}
 
 	vector<Star> stars;
@@ -76,7 +87,7 @@ int main(int argc, char* argv[])
 	}
 	
 
-	scene.Add(new Player{ 200, kiko::Pi, { { 400, 300 }, 0, 6 }, model });
+	
 
 	kiko::Transform transform{ { 400, 300 }, 0, 3};
 
@@ -132,6 +143,9 @@ int main(int argc, char* argv[])
 		kiko::g_renderer.EndFrame();
 
 	}
+
+	scene.RemoveAll();
+	kiko::g_memoryTracker.DisplayInfo();
 
 	return 0;
 }
