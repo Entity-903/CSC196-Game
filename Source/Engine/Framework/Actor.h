@@ -2,6 +2,8 @@
 #include "Core/Core.h"
 #include "Renderer/Model.h"
 
+namespace kiko
+{
 class Actor
 {
 public:
@@ -14,7 +16,10 @@ public:
 	virtual void Update(float dt) = 0;
 	virtual void Draw(kiko::Renderer& renderer);
 
+	class Scene* m_scene = nullptr;
+
 protected:
 	kiko::Transform m_transform;
 	kiko::Model m_model;
 };
+}

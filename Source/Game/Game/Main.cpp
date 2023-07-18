@@ -5,6 +5,8 @@
 #include "Input/InputSystem.h"
 #include "Player.h"
 #include "Enemy.h"
+#include "Audio/AudioSystem.h"
+#include "Framework/Scene.h"
 
 #include <vector>
 #include <thread>
@@ -45,8 +47,9 @@ int main(int argc, char* argv[])
 	//kiko::Renderer renderer;
 	kiko::g_renderer.Initialize();
 	kiko::g_renderer.CreateWindow("CSC196", 800, 600);
-
 	kiko::g_inputSystem.Initialize();
+	kiko::g_audioSystem.Initialize();
+	kiko::g_audioSystem.AddAudio("Laser_Shoot", "Laser_Shoot.wav");
 
 	//std::vector<kiko::vec2> points{ { 1, 0, 0}, 6, { 0.00, -3.00 },	{ 2.00, 3.00 },	{ -3.00, -1.00 }, { 3.00, -1.00 }, { -2.00, 3.00 }, { 0.00, -3.00 }};
 	kiko::Model model;
@@ -56,13 +59,11 @@ int main(int argc, char* argv[])
 	float speed = 100;
 	constexpr float turnrate = kiko::DegreesToRadians(180);
 
-	Player player{ 200, kiko::Pi, { { 400, 300 }, 0, 6 }, model };
-
-	std::vector<Enemy> enemies;
-	for (int i = 0; i < 1000; i++)
+	kiko::Scene scene;
+	for (int i = 0; i < 10; i++)
 	{
-		Enemy enemy{ 300, kiko::Pi, { { kiko::randomf(kiko::g_renderer.GetWidth()), kiko::randomf(kiko::g_renderer.GetHeight()) }, kiko::randomf(kiko::TwoPi), 3}, model}; // Enemy enemy{ 300, kiko::Pi, { { 400, 300 }, kiko::randomf(kiko::TwoPi), 3}, model};
-		enemies.push_back(enemy);
+		Enemy* enemy = new Enemy{ 300, kiko::Pi, { { kiko::randomf(kiko::g_renderer.GetWidth()), kiko::randomf(kiko::g_renderer.GetHeight()) }, kiko::randomf(kiko::TwoPi), 3}, model}; // Enemy enemy{ 300, kiko::Pi, { { 400, 300 }, kiko::randomf(kiko::TwoPi), 3}, model};
+		scene.Add(enemy);
 	}
 
 	vector<Star> stars;
@@ -73,6 +74,9 @@ int main(int argc, char* argv[])
 
 		stars.push_back(Star(pos, vel));
 	}
+	
+
+	scene.Add(new Player{ 200, kiko::Pi, { { 400, 300 }, 0, 6 }, model });
 
 	kiko::Transform transform{ { 400, 300 }, 0, 3};
 
@@ -96,8 +100,15 @@ int main(int argc, char* argv[])
 		//position += direction * speed * kiko::g_time.GetDeltaTime();;
 
 		// Update game
-		player.Update(kiko::g_time.GetDeltaTime());
-		for (auto& enemy : enemies) enemy.Update(kiko::g_time.GetDeltaTime());
+		scene.Update(kiko::g_time.GetDeltaTime());
+
+		// Update Audio
+		kiko::g_audioSystem.Update();
+		if (kiko::g_inputSystem.GetKeyDown(SDL_SCANCODE_SPACE) &&
+			!kiko::g_inputSystem.GetPreviousKeyDown(SDL_SCANCODE_SPACE))
+		{
+			kiko::g_audioSystem.PlayOneShot("Laser_Shoot");
+		}
 
 		// Draw game
 		kiko::g_renderer.SetColor(0, 0, 0, 0);
@@ -116,12 +127,7 @@ int main(int argc, char* argv[])
 	
 		kiko::g_renderer.SetColor(kiko::random(256), kiko::random(256), kiko::random(256), 255);
 
-		player.Draw(kiko::g_renderer);
-		for (auto& enemy : enemies) {
-			kiko::g_renderer.SetColor(kiko::random(256), kiko::random(256), kiko::random(256), 255);
-			enemy.Draw(kiko::g_renderer);
-		}
-		
+		scene.Draw(kiko::g_renderer);
 
 		kiko::g_renderer.EndFrame();
 
