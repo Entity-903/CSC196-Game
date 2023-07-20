@@ -1,6 +1,6 @@
 #include "Renderer/Renderer.h"
 #include "Core/Core.h"
-#include "Renderer/Model.h"
+#include "Renderer/ModelManager.h"
 #include "Input/InputSystem.h"
 #include "Player.h"
 #include "Enemy.h"
@@ -41,13 +41,7 @@ public:
 
 int main(int argc, char* argv[])
 {
-
-	{
-	//std::unique_ptr<int> up = std::make_unique<int>(10);
-	}
-
-	kiko::g_memoryTracker.DisplayInfo();
-
+	kiko::MemoryTracker::Initialize();
 	kiko::seedRandom((unsigned int)time(nullptr));
 	kiko::setFilePath("assets");
 
@@ -55,25 +49,29 @@ int main(int argc, char* argv[])
 	//kiko::Renderer renderer;
 	kiko::g_renderer.Initialize();
 	kiko::g_renderer.CreateWindow("CSC196", 800, 600);
+
 	kiko::g_inputSystem.Initialize();
 	kiko::g_audioSystem.Initialize();
 	kiko::g_audioSystem.AddAudio("Laser_Shoot", "Laser_Shoot.wav");
 
-	kiko::Model model;
-	model.Load("Star.txt");
+	//kiko::Model model;
+	//model.Load("Star.txt");
 	kiko::vec2 position{ 400, 300 };
 
 	float speed = 100;
 	constexpr float turnrate = kiko::DegreesToRadians(180);
 
 	kiko::Scene scene;
-	unique_ptr<Player> player = std::make_unique<Player>(200.0f, kiko::Pi, kiko::Transform{ { 400, 300 }, 0, 6 }, model);
+	unique_ptr<Player> player = std::make_unique<Player>(200.0f, kiko::Pi, kiko::Transform{ { 400, 300 }, 0, 6 }, kiko::g_manager.Get("Star.txt"));
+	player->m_tag = "Player";
 	scene.Add(std::move(player));
 
 
-	for (int i = 0; i < 10; i++)
+
+	for (int i = 0; i < 5; i++)
 	{
-		unique_ptr<Enemy> enemy = std::make_unique<Enemy>(300.0f, kiko::Pi, kiko::Transform{ {kiko::randomf(kiko::g_renderer.GetWidth()), kiko::randomf(kiko::g_renderer.GetHeight())}, kiko::randomf(kiko::TwoPi), 3}, model);
+		unique_ptr<Enemy> enemy = std::make_unique<Enemy>(kiko::randomf(75.0f, 150.0f), kiko::Pi, kiko::Transform{ {kiko::randomf(kiko::g_renderer.GetWidth()), kiko::randomf(kiko::g_renderer.GetHeight())}, kiko::randomf(kiko::TwoPi), 3}, kiko::g_manager.Get("Something.txt"));
+		enemy->m_tag = "Enemy";
 		scene.Add(std::move(enemy));
 	}
 
@@ -145,7 +143,6 @@ int main(int argc, char* argv[])
 	}
 
 	scene.RemoveAll();
-	kiko::g_memoryTracker.DisplayInfo();
 
 	return 0;
 }

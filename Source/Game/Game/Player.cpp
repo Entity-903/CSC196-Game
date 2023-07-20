@@ -6,6 +6,9 @@
 
 void Player::Update(float dt)
 {
+
+	Actor::Update(dt);
+
 	// Movement
 	float rotate = 0;
 	if (kiko::g_inputSystem.GetKeyDown(SDL_SCANCODE_A)) rotate = -1;
@@ -27,6 +30,20 @@ void Player::Update(float dt)
 		// Create Weapon
 		kiko::Transform transform{ m_transform.position, m_transform.rotation, 1};
 		std::unique_ptr<Weapon> weapon = std::make_unique<Weapon>( 400.0f, m_transform, m_model );
+		weapon->m_tag = "Player";
 		m_scene->Add(std::move(weapon));
+	}
+}
+
+void Player::OnCollision(Actor* other)
+{
+	if (other->m_tag == "EnemyBullet")
+	{
+		// Maybe give "EnemyBullet" its own .h and .cpp so it can be given its own code to run when colliding with the Player
+		m_health -= 10.0f;
+		if (m_health <= 0)
+		{
+		m_destroyed = true;
+		}
 	}
 }

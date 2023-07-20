@@ -27,6 +27,12 @@ namespace kiko
 	}
 
 	template <typename T>
+	inline T Min(T a, T b)
+	{
+		return (a < b) ? a : b;
+	}
+
+	template <typename T>
 	inline T Clamp(T value, T min, T max) // 4 - 10 -> 3
 	{
 		if (min > max) std::swap(min, max);
