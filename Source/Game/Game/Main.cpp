@@ -9,6 +9,8 @@
 #include "Renderer/Font.h"
 #include "Renderer/Text.h"
 
+#include "SpaceGame.h"
+
 #include <iostream>
 #include <vector>
 #include <thread>
@@ -53,23 +55,27 @@ int main(int argc, char* argv[])
 	kiko::g_renderer.CreateWindow("CSC196", 800, 600);
 
 	kiko::g_inputSystem.Initialize();
-	kiko::g_audioSystem.Initialize();
-	kiko::g_audioSystem.AddAudio("Laser_Shoot", "Laser_Shoot.wav");
 
-	// Create Font / Text Objects
-	std::shared_ptr<kiko::Font> font = std::make_shared<kiko::Font>("EmptyMegazineDemoRegular.ttf", 24);
-	std::unique_ptr<kiko::Text> text = std::make_unique<kiko::Text>(font);
-	text->Create(kiko::g_renderer, "NEUMONT", kiko::Color{ 1, 1, 1, 1 });
+	kiko::g_audioSystem.Initialize();
+
+	unique_ptr<SpaceGame> game = make_unique<SpaceGame>();
+	game->Initialize();
+	//kiko::g_audioSystem.AddAudio("Laser_Shoot", "Laser_Shoot.wav");
+
+	//// Create Font / Text Objects
+	//std::shared_ptr<kiko::Font> font = std::make_shared<kiko::Font>("EmptyMegazineDemoRegular.ttf", 24);
+	//std::unique_ptr<kiko::Text> text = std::make_unique<kiko::Text>(font);
+	//text->Create(kiko::g_renderer, "NEUMONT", kiko::Color{ 1, 1, 1, 1 });
 
 	//kiko::Model model;
-	//model.Load("Star.txt");
+	//model.Load("Ship.txt");
 	kiko::vec2 position{ 400, 300 };
 
 	float speed = 100;
 	constexpr float turnrate = kiko::DegreesToRadians(180);
 
-	kiko::Scene scene;
-	unique_ptr<Player> player = std::make_unique<Player>(200.0f, kiko::Pi, kiko::Transform{ { 400, 300 }, 0, 6 }, kiko::g_manager.Get("Star.txt"));
+	/*kiko::Scene scene;
+	unique_ptr<Player> player = std::make_unique<Player>(200.0f, kiko::Pi, kiko::Transform{ { 400, 300 }, 0, 6 }, kiko::g_manager.Get("Ship.txt"));
 	player->m_tag = "Player";
 	scene.Add(std::move(player));
 
@@ -80,7 +86,7 @@ int main(int argc, char* argv[])
 		unique_ptr<Enemy> enemy = std::make_unique<Enemy>(kiko::randomf(75.0f, 150.0f), kiko::Pi, kiko::Transform{ {kiko::randomf(kiko::g_renderer.GetWidth()), kiko::randomf(kiko::g_renderer.GetHeight())}, kiko::randomf(kiko::TwoPi), 3}, kiko::g_manager.Get("Something.txt"));
 		enemy->m_tag = "Enemy";
 		scene.Add(std::move(enemy));
-	}
+	}*/
 
 	vector<Star> stars;
 	for (int i = 0; i < 5000; i++)
@@ -117,7 +123,7 @@ int main(int argc, char* argv[])
 		//position += direction * speed * kiko::g_time.GetDeltaTime();;
 
 		// Update game
-		scene.Update(kiko::g_time.GetDeltaTime());
+		game->Update(kiko::g_time.GetDeltaTime());
 
 		// Update Audio
 		kiko::g_audioSystem.Update();
@@ -131,7 +137,7 @@ int main(int argc, char* argv[])
 		kiko::g_renderer.SetColor(0, 0, 0, 0);
 		kiko::g_renderer.BeginFrame();
 
-		text->Draw(kiko::g_renderer, 400, 300);
+		//text->Draw(kiko::g_renderer, 400, 300);
 
 		for (auto& star : stars)
 		{
@@ -146,14 +152,12 @@ int main(int argc, char* argv[])
 	
 		kiko::g_renderer.SetColor(kiko::random(256), kiko::random(256), kiko::random(256), 255);
 
-		scene.Draw(kiko::g_renderer);
+		game->Draw(kiko::g_renderer);
 
 
 		kiko::g_renderer.EndFrame();
 
 	}
-
-	scene.RemoveAll();
 
 	return 0;
 }

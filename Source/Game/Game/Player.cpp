@@ -1,5 +1,6 @@
 #include "Player.h"
 #include "Weapon.h"
+#include "SpaceGame.h"
 #include "Framework/Scene.h"
 #include "Input/InputSystem.h"
 #include "Renderer/Renderer.h"
@@ -13,7 +14,7 @@ void Player::Update(float dt)
 	float rotate = 0;
 	if (kiko::g_inputSystem.GetKeyDown(SDL_SCANCODE_A)) rotate = -1;
 	if (kiko::g_inputSystem.GetKeyDown(SDL_SCANCODE_D)) rotate = 1;
-	m_transform.rotation += rotate * m_turnRate * kiko::TwoPi * kiko::g_time.GetDeltaTime();
+	m_transform.rotation += rotate * m_turnRate * kiko::g_time.GetDeltaTime();
 
 	float thrust = 0;
 	if (kiko::g_inputSystem.GetKeyDown(SDL_SCANCODE_W)) thrust = 5;
@@ -31,19 +32,22 @@ void Player::Update(float dt)
 		kiko::Transform transform{ m_transform.position, m_transform.rotation, 1};
 		std::unique_ptr<Weapon> weapon = std::make_unique<Weapon>( 400.0f, m_transform, m_model );
 		weapon->m_tag = "Player";
+		weapon->m_game = m_game;
 		m_scene->Add(std::move(weapon));
 	}
 }
 
 void Player::OnCollision(Actor* other)
 {
-	if (other->m_tag == "EnemyBullet")
+	if (dynamic_cast<Weapon*>(other) != nullptr && other->m_tag == "Enemy")
 	{
-		// Maybe give "EnemyBullet" its own .h and .cpp so it can be given its own code to run when colliding with the Player
-		m_health -= 10.0f;
+		m_health -= 10;
+		std::cout << m_health << "\n";
 		if (m_health <= 0)
 		{
-		m_destroyed = true;
+			m_game->SetLives(m_game->GetLives() - 1);
+			dynamic_cast<SpaceGame*>(m_game)->SetState(SpaceGame::eState::PlayerDead);
+			m_destroyed = true;
 		}
 	}
 }

@@ -23,6 +23,8 @@ public:
 	class Scene* m_scene = nullptr;
 	friend class Scene;
 
+	class Game* m_game = nullptr;
+
 	kiko::Transform m_transform;
 	std::string m_tag;
 

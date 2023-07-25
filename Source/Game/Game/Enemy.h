@@ -22,5 +22,5 @@ private:
 	float m_fireTime = 0;
 	float m_fireRate = 0;
 
-	float m_health = 100.0f;
+	float m_health = 50.0f;
 };
