@@ -37,11 +37,11 @@ void Enemy::Update(float dt)
 
 void Enemy::OnCollision(Actor* other)
 {
-	//Player* p = dynamic_cast<Player*>(other)
 
 	if (other->m_tag == "Player")
 	{
-		m_destroyed = true;
+		m_health -= 10;
+		if (m_health <= 0) m_destroyed = true;
 		
 	}
 }

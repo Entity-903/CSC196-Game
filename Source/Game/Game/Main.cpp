@@ -6,6 +6,8 @@
 #include "Enemy.h"
 #include "Audio/AudioSystem.h"
 #include "Framework/Scene.h"
+#include "Renderer/Font.h"
+#include "Renderer/Text.h"
 
 #include <iostream>
 #include <vector>
@@ -54,6 +56,11 @@ int main(int argc, char* argv[])
 	kiko::g_audioSystem.Initialize();
 	kiko::g_audioSystem.AddAudio("Laser_Shoot", "Laser_Shoot.wav");
 
+	// Create Font / Text Objects
+	std::shared_ptr<kiko::Font> font = std::make_shared<kiko::Font>("EmptyMegazineDemoRegular.ttf", 24);
+	std::unique_ptr<kiko::Text> text = std::make_unique<kiko::Text>(font);
+	text->Create(kiko::g_renderer, "NEUMONT", kiko::Color{ 1, 1, 1, 1 });
+
 	//kiko::Model model;
 	//model.Load("Star.txt");
 	kiko::vec2 position{ 400, 300 };
@@ -93,6 +100,7 @@ int main(int argc, char* argv[])
 	bool quit = false;
 	while (!quit)
 	{
+
 		// Update engine
 		kiko::g_time.Tick();
 		kiko::g_inputSystem.Update();
@@ -123,6 +131,8 @@ int main(int argc, char* argv[])
 		kiko::g_renderer.SetColor(0, 0, 0, 0);
 		kiko::g_renderer.BeginFrame();
 
+		text->Draw(kiko::g_renderer, 400, 300);
+
 		for (auto& star : stars)
 		{
 			star.Update(kiko::g_renderer.GetWidth(), kiko::g_renderer.GetHeight());
@@ -137,6 +147,7 @@ int main(int argc, char* argv[])
 		kiko::g_renderer.SetColor(kiko::random(256), kiko::random(256), kiko::random(256), 255);
 
 		scene.Draw(kiko::g_renderer);
+
 
 		kiko::g_renderer.EndFrame();
 
