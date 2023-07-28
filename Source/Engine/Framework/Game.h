@@ -6,6 +6,7 @@ namespace kiko
 	class Scene;
 	class Renderer;
 
+	
 	class Game
 	{
 	public:

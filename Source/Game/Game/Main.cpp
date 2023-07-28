@@ -8,6 +8,7 @@
 #include "Framework/Scene.h"
 #include "Renderer/Font.h"
 #include "Renderer/Text.h"
+#include "Renderer/ParticleSystem.h"
 
 #include "SpaceGame.h"
 
@@ -124,6 +125,7 @@ int main(int argc, char* argv[])
 
 		// Update game
 		game->Update(kiko::g_time.GetDeltaTime());
+		kiko::g_particleSystem.Update(kiko::g_time.GetDeltaTime());
 
 		// Update Audio
 		kiko::g_audioSystem.Update();
@@ -153,7 +155,7 @@ int main(int argc, char* argv[])
 		kiko::g_renderer.SetColor(kiko::random(256), kiko::random(256), kiko::random(256), 255);
 
 		game->Draw(kiko::g_renderer);
-
+		kiko::g_particleSystem.Draw(kiko::g_renderer);
 
 		kiko::g_renderer.EndFrame();
 

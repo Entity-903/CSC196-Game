@@ -20,6 +20,6 @@ namespace kiko
 	private:
 		std::vector<vec2> m_points;
 		Color m_color;
-		float m_radius = 0; // Originally 0; Ideally 1.5f
+		float m_radius = 0;
 	};
 }
